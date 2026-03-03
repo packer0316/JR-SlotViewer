@@ -21,8 +21,8 @@
 | 用途 | 技術選型 |
 |------|---------|
 | UI 框架 | React 18 |
-| 渲染引擎 | PixiJS 8（WebGL2 / WebGPU） |
-| Spine 執行時 | @esotericsoftware/spine-pixi |
+| 渲染引擎 | PixiJS 7（WebGL2） |
+| Spine 執行時 | @pixi-spine/all-3.8 |
 | 全局狀態 | Zustand |
 
 ### 使用者與部署
@@ -52,8 +52,8 @@
 | 類別 | 技術 | 版本 / 備註 |
 |------|------|-------------|
 | 框架 | React + TypeScript | React 18、TypeScript 5 |
-| 渲染 | PixiJS | 8.x（WebGL2 為主，WebGPU fallback） |
-| Spine 執行時 | @esotericsoftware/spine-pixi | 4.2.x |
+| 渲染 | PixiJS | 7.4.x（WebGL2 only） |
+| Spine 執行時 | @pixi-spine/all-3.8 | 4.0.x（Spine 3.8 Runtime） |
 | 狀態管理 | Zustand + Immer middleware | 4.x |
 | 動畫補間 | GSAP | 3.x（僅用於腳本層，不介入渲染層） |
 | 建置工具 | Vite + React plugin | 5.x |
@@ -87,7 +87,7 @@
 │        │                                              │      │
 │  ┌─────▼──────────────────────────────────────────────▼────┐ │
 │  │               PixiJS Application (Canvas)                │ │
-│  │           WebGL2 / WebGPU Renderer + Ticker              │ │
+│  │           WebGL2 Renderer + Ticker                        │ │
 │  └─────────────────────────────────────────────────────────┘ │
 └──────────────────────────────────────────────────────────────┘
 ```

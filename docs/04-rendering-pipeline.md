@@ -10,26 +10,25 @@
 
 ### 1.1 初始化 (init)
 
-Application 啟動時優先嘗試 WebGPU，若不支援則自動降級為 WebGL2：
+Application 使用 PixiJS 7 的同步建構式建立，採用 WebGL2 渲染器：
 
 ```typescript
 import { Application } from 'pixi.js';
 
-const app = new Application();
-
-await app.init({
-  preference: 'webgpu',       // 優先 WebGPU，降級為 webgl2
+const app = new Application({
+  view: canvas,
+  width: canvasWidth,
+  height: canvasHeight,
   antialias: true,
   resolution: window.devicePixelRatio || 1,
   autoDensity: true,
   backgroundColor: 0x1a1a2e,  // 深色背景，搭配 Glassmorphism 主題
-  resizeTo: undefined,         // 手動管理 resize（見 1.3）
 });
 
-canvasContainer.appendChild(app.canvas);
+canvasContainer.appendChild(app.view as HTMLCanvasElement);
 ```
 
-> **注意**：`resizeTo` 設為 `undefined`，改由 `ResizeObserver` 精確控制尺寸，避免多次不必要的 resize 呼叫。
+> **注意**：使用 `ResizeObserver` 精確控制尺寸，避免多次不必要的 resize 呼叫。
 
 ### 1.2 Ticker（主迴圈）
 
@@ -115,7 +114,7 @@ Stage (root Container)
 
 | 圖層 | 職責 | 典型內容 |
 |------|------|---------|
-| **BackgroundLayer** | 靜態背景，通常啟用 CacheAsTexture | 底圖 Sprite |
+| **BackgroundLayer** | 靜態背景，通常啟用 cacheAsBitmap | 底圖 Sprite |
 | **ReelContainer** | 轉輪模擬的根容器，含多軸 | Reel + Symbol |
 | **SpineLayer** | Spine 動畫播放 | Wild、Scatter、Bonus 演出 |
 | **OverlayLayer** | 疊加效果 | 粒子系統、全螢幕閃光 |
@@ -345,7 +344,7 @@ class ReelContainer {
   │             ├── 計算世界矩陣 (updateTransform)                  │
   │             ├── 套用 Mask (如有)                                │
   │             ├── 套用 BlendMode                                 │
-  │             ├── CacheAsTexture 檢查                            │
+  │             ├── cacheAsBitmap 檢查                             │
   │             └── 提交 Draw Call                                 │
   │                                                              │
   │  ⑤ GPU 執行繪製指令 → 畫面輸出                                  │
@@ -362,7 +361,7 @@ class ReelContainer {
 
 ## 6. Blend Modes
 
-PixiJS 8 支援多種混合模式，可在圖層面板中逐層設定：
+PixiJS 7 支援多種混合模式，可在圖層面板中逐層設定：
 
 | 模式 | PixiJS 常數 | 效果 | 典型用途 |
 |------|-------------|------|---------|
@@ -381,17 +380,17 @@ container.blendMode = 'add';
 
 ---
 
-## 7. CacheAsTexture 策略
+## 7. cacheAsBitmap 策略
 
 ### 7.1 概念
 
-`CacheAsTexture` 將一個 Container 及其所有子節點渲染為一張 **RenderTexture**，後續幀直接繪製該材質而非逐一遍歷子節點。對於靜態或不常變動的圖層，這能顯著減少 Draw Call 數量。
+`cacheAsBitmap` 將一個 Container 及其所有子節點渲染為一張 **RenderTexture**，後續幀直接繪製該材質而非逐一遍歷子節點。對於靜態或不常變動的圖層，這能顯著減少 Draw Call 數量。
 
 ### 7.2 何時快取
 
 ```
 ┌─────────────────────────────────────────────────────┐
-│          CacheAsTexture 決策流程                      │
+│          cacheAsBitmap 決策流程                       │
 │                                                      │
 │  圖層是否正在播放動畫？                                 │
 │      ├── 是 → ❌ 不快取（每幀內容都在變）                │
@@ -406,13 +405,10 @@ container.blendMode = 'add';
 
 ```typescript
 // 啟用快取
-container.cacheAsTexture(true);
+container.cacheAsBitmap = true;
 
-// 手動使快取失效（當內容有變更時）
-container.updateCacheTexture();
-
-// 關閉快取
-container.cacheAsTexture(false);
+// 關閉快取（PixiJS 7 會在下次渲染時自動失效）
+container.cacheAsBitmap = false;
 ```
 
 ### 7.4 自動管理
@@ -430,9 +426,9 @@ class LayerManager {
       container.children.length > 1;  // 子節點多於一個才有收益
 
     if (shouldCache && !container.cacheAsBitmap) {
-      container.cacheAsTexture(true);
+      container.cacheAsBitmap = true;
     } else if (!shouldCache && container.cacheAsBitmap) {
-      container.cacheAsTexture(false);
+      container.cacheAsBitmap = false;
     }
   }
 }
@@ -442,9 +438,9 @@ class LayerManager {
 
 | 觸發條件 | 處理方式 |
 |----------|---------|
-| 子節點新增 / 移除 | `container.cacheAsTexture(false)` → 重新評估 |
-| 子節點屬性變更（position, alpha 等） | `container.updateCacheTexture()` |
-| 動畫開始播放 | `container.cacheAsTexture(false)` |
+| 子節點新增 / 移除 | `container.cacheAsBitmap = false` → 重新評估 |
+| 子節點屬性變更（position, alpha 等） | `container.cacheAsBitmap = false` → 重新啟用 |
+| 動畫開始播放 | `container.cacheAsBitmap = false` |
 | 動畫結束 | 重新評估，可能再次啟用快取 |
 
 ---

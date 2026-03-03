@@ -66,7 +66,7 @@ class PixiApp {
 
 | 依賴項 | 說明 |
 |--------|------|
-| PixiJS 8 | `Application`, `Container`, `Ticker` |
+| PixiJS 7 | `Application`, `Container`, `Ticker` |
 
 #### 訂閱的 Store
 
@@ -122,7 +122,7 @@ class LayerManager {
 |--------|------|
 | `PixiApp` | 取得 Stage 根容器以掛載圖層 Container |
 | `ClipManager` | 當圖層綁定遮罩時，委託 ClipManager 處理 |
-| PixiJS 8 | `Container`, `Sprite`, `BlendMode` |
+| PixiJS 7 | `Container`, `Sprite`, `BlendMode` |
 
 #### 訂閱的 Store
 
@@ -178,7 +178,7 @@ class ClipManager {
 
 | 依賴項 | 說明 |
 |--------|------|
-| PixiJS 8 | `Graphics`, `Sprite`, `Texture`, `MaskData` |
+| PixiJS 7 | `Graphics`, `Sprite`, `Texture`, `MaskData` |
 | `LayerManager` | 需取得目標圖層的 Container 以套用遮罩 |
 
 #### 訂閱的 Store
@@ -228,8 +228,8 @@ class SpineLoader {
 
 | 依賴項 | 說明 |
 |--------|------|
-| `@esotericsoftware/spine-pixi` | Spine 執行時核心 |
-| PixiJS 8 | `Assets` loader |
+| `@pixi-spine/all-3.8` | Spine 執行時核心 |
+| PixiJS 7 | `Assets` loader |
 | `SpineActor` | 載入完成後包裝為 SpineActor 實例 |
 
 #### 訂閱的 Store
@@ -251,7 +251,7 @@ class SpineLoader {
 
 #### 職責
 
-封裝單一 Spine 動畫實例的高階 API。提供播放、混合、軌道控制、皮膚切換、附件切換等功能，遮蔽底層 `@esotericsoftware/spine-pixi` 的實作細節。
+封裝單一 Spine 動畫實例的高階 API。提供播放、混合、軌道控制、皮膚切換、附件切換等功能，遮蔽底層 `@pixi-spine/all-3.8` 的實作細節。
 
 #### 公開 API
 
@@ -302,7 +302,7 @@ class SpineActor {
 
 | 依賴項 | 說明 |
 |--------|------|
-| `@esotericsoftware/spine-pixi` | `Spine`, `AnimationState`, `Skeleton` |
+| `@pixi-spine/all-3.8` | `Spine`, `AnimationState`, `Skeleton` |
 
 #### 訂閱的 Store
 
@@ -361,7 +361,7 @@ class ReelEngine {
 | `PixiApp` | 取得 Ticker 用於逐幀更新 |
 | `ReelConfig` | 盤面設定參數 |
 | `SymbolPool` | 從物件池取得 / 歸還 Symbol |
-| PixiJS 8 | `Container`, `Ticker` |
+| PixiJS 7 | `Container`, `Ticker` |
 | GSAP | 彈跳動畫補間 |
 
 #### 訂閱的 Store
@@ -537,7 +537,7 @@ class SymbolPool {
 
 | 依賴項 | 說明 |
 |--------|------|
-| PixiJS 8 | `Container`, `Sprite` |
+| PixiJS 7 | `Container`, `Sprite` |
 | `ReelConfig` | 取得 `symbols` 定義以建立對應的顯示物件 |
 
 #### 訂閱的 Store

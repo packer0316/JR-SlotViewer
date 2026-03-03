@@ -13,19 +13,19 @@ Slot Previewer 必須在瀏覽器中同時驅動 **5 條轉輪 × 3+ 列 Symbol*
 | 指標 | 目標值 | 測量方式 |
 |------|--------|----------|
 | 目標幀率 | 60 FPS | PixiJS Ticker + 自訂 FPS Counter |
-| DrawCall | < 10 DC / 幀 | `renderer.renderPipes` 統計 |
+| DrawCall | < 10 DC / 幀 | `renderer` 統計（Spector.js / PixiJS DevTools） |
 | JS Heap | < 200 MB | `performance.measureUserAgentSpecificMemory()` |
 | 初始載入 | < 3 秒 | Vite dev mode（首次 HTML → 畫面可互動） |
 | Spine 切換延遲 | < 16 ms | `performance.now()` 前後差值 |
 
 > **為何 < 10 DC？**
-> 每個 DrawCall 對應一次 GPU 狀態切換。在同時渲染 5 軸 Symbol + Spine 動畫 + UI 圖層的場景下，若不做任何合批，DrawCall 可能輕易超過 30。透過 Atlas 合批與 CacheAsTexture，將 DrawCall 壓在 10 以內，可確保低階 GPU 也能維持 60 fps。
+> 每個 DrawCall 對應一次 GPU 狀態切換。在同時渲染 5 軸 Symbol + Spine 動畫 + UI 圖層的場景下，若不做任何合批，DrawCall 可能輕易超過 30。透過 Atlas 合批與 CacheAsBitmap，將 DrawCall 壓在 10 以內，可確保低階 GPU 也能維持 60 fps。
 
 ---
 
 ## 2. 渲染效能策略
 
-### 2.1 CacheAsTexture（靜態圖層快取）
+### 2.1 CacheAsBitmap（靜態圖層快取）
 
 對於不經常變動的圖層（如背景、邊框裝飾），將其快取為 `RenderTexture`，後續幀只需繪製單張貼圖，大幅減少 DrawCall。
 
@@ -36,15 +36,15 @@ Slot Previewer 必須在瀏覽器中同時驅動 **5 條轉輪 × 3+ 列 Symbol*
 - 自動管理：連續 N 幀無變更時自動啟用快取
 
 ```typescript
-// CacheAsTexture 使用方式（PixiJS 8）
+// CacheAsBitmap 使用方式（PixiJS 7）
 const staticLayer = new Container();
-staticLayer.cacheAsTexture(true);
+staticLayer.cacheAsBitmap = true;
 
 // 當屬性變更時，需手動更新快取
 function onPropertyChange(layer: Container) {
-  layer.cacheAsTexture(false);
+  layer.cacheAsBitmap = false;
   // 修改屬性...
-  layer.cacheAsTexture(true);
+  layer.cacheAsBitmap = true;
 }
 ```
 
@@ -79,7 +79,7 @@ function onPropertyChange(layer: Container) {
 
 - 相關 Spine（如同場景的角色與特效）盡量共用同一張 Atlas
 - 在 Scene Graph 中將同 Atlas 的 Spine 節點排列在一起，避免穿插其他元素
-- 利用 PixiJS 8 的 `renderPipes` 統計確認合批效果
+- 利用 PixiJS DevTools 或 Spector.js 統計確認合批效果
 
 ### 2.3 符號圖集（Symbol Atlas）
 
@@ -328,7 +328,7 @@ export default defineConfig({
         manualChunks: {
           vendor: ['react', 'react-dom', 'zustand'],
           pixi: ['pixi.js'],
-          spine: ['@esotericsoftware/spine-pixi'],
+          spine: ['@pixi-spine/all-3.8'],
         },
       },
     },
@@ -380,7 +380,7 @@ Status Bar 位於應用程式底部，常駐顯示效能指標：
 | 指標 | 來源 | 更新頻率 |
 |------|------|----------|
 | FPS | PixiJS Ticker `deltaTime` 滑動平均 | 每秒 |
-| DC（DrawCall） | `renderer.renderPipes` 統計 | 每幀 |
+| DC（DrawCall） | `renderer` 統計（Spector.js / PixiJS DevTools） | 每幀 |
 | Mem（記憶體） | `performance.measureUserAgentSpecificMemory()` | 每 5 秒 |
 | Pool（物件池使用率） | `SymbolPool.utilization` | 每秒 |
 
@@ -427,7 +427,7 @@ function checkBudget(metrics: PerfMetrics): void {
 |------|------|------|
 | Spine 載入延遲 | `.skel` 二進位解析佔用主執行緒 | Web Worker 離線解析（§5.3） |
 | 轉輪滾動卡頓 | Symbol 頻繁建立 / 銷毀引發 GC 壓力 | ObjectPool 複用（§2.4） |
-| 大量圖層 DrawCall | 每個圖層獨立繪製 | CacheAsTexture + Spine 合批（§2.1, §2.2） |
+| 大量圖層 DrawCall | 每個圖層獨立繪製 | CacheAsBitmap + Spine 合批（§2.1, §2.2） |
 | Atlas 過大 | 單張 Atlas 佔用過多 GPU 記憶體 | 按需載入 + 依使用頻率分組 Atlas（§2.3） |
 | React re-render 風暴 | Store 狀態變更觸發大面積重繪 | 細粒度 Selector + useShallow（§3.1） |
 | Spine 切換閃爍 | 切換時重新建立 Skeleton 耗時 | 快取 SkeletonData + 預建實例（§4.2） |

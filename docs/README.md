@@ -1,6 +1,6 @@
 # Slot Previewer — 架構文件索引
 
-> **版本**：v1.0 | **最後更新**：2026/03/03 | **技術棧**：React 18 + PixiJS 8 + Spine Runtime + Zustand
+> **版本**：v1.0 | **最後更新**：2026/03/03 | **技術棧**：React 18 + PixiJS 7 + Spine 3.8 Runtime + Zustand
 
 本目錄包含 Slot Previewer 的完整架構設計文件。Slot Previewer 是一套基於瀏覽器的 Slot 遊戲動畫預覽工具，提供美術人員即時預覽 Spine 動畫、調整圖層結構、模擬轉輪行為，以及撰寫並執行表演腳本。
 
@@ -13,7 +13,7 @@
 | 01 | [架構總覽](01-architecture-overview.md) | 系統總覽、設計原則、技術棧、系統架構圖、目錄結構、模組依賴、擴充性要點 |
 | 02 | [模組設計](02-module-design.md) | 各模組職責、公開 API（TypeScript 簽名）、依賴關係、通訊方式、擴充指南 |
 | 03 | [資料模型](03-data-models.md) | 所有 TypeScript 介面與型別定義：圖層、Clipping、轉輪、Spine、腳本、專案 I/O、Store Slice |
-| 04 | [渲染管線](04-rendering-pipeline.md) | PixiJS Application 生命週期、場景圖結構、圖層系統、Clipping 系統、Blend Mode、CacheAsTexture、座標系統 |
+| 04 | [渲染管線](04-rendering-pipeline.md) | PixiJS Application 生命週期、場景圖結構、圖層系統、Clipping 系統、Blend Mode、cacheAsBitmap、座標系統 |
 | 05 | [轉輪系統](05-reel-system.md) | 盤面配置（可變列數）、盤面編輯器、ReelEngine 運動模型、Symbol 物件池、Reel Clipping |
 | 06 | [Spine 整合](06-spine-integration.md) | SpineLoader 資源載入、SpineActor 動畫控制、Clipping Attachment、控制面板 UI、效能考量 |
 | 07 | [腳本引擎](07-script-engine.md) | 腳本結構、13 種內建 Action、ActionHandler 架構、ScriptRunner 執行流程、EventBus 事件系統 |
@@ -40,9 +40,9 @@
 
 | 決策 | 選擇 | 原因 |
 |------|------|------|
-| 渲染引擎 | PixiJS 8 | WebGPU 支援、改進的批次渲染、Spine 官方整合 |
+| 渲染引擎 | PixiJS 7 | 成熟穩定、@pixi-spine/all-3.8 原生支援 Spine 3.8 |
 | 狀態管理 | Zustand + Immer | 輕量、支援細粒度訂閱、PixiJS Manager 可直接訂閱 |
-| Spine Runtime | @esotericsoftware/spine-pixi | 官方 PixiJS 整合、Spine 4.x 完整功能 |
+| Spine Runtime | @pixi-spine/all-3.8 | 社群維護的 PixiJS 7 整合、Spine 3.8 完整功能 |
 | 專案儲存 | .ZIP 檔案 | 打包美術資源 + 狀態、易於分享、無需後端 |
 | 轉輪配置 | 可變列數 | 支援標準 5×3 及 Megaways 等各種盤面 |
 | 腳本系統 | JSON + Action 註冊制 | 設計師可編輯、無需改程式碼、易於擴充 |
